@@ -27,7 +27,25 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    
+    const data = client.db("createAssignmentDB");
+    const assignCollection = data.collection("assignData")
+
+    app.get('/createAssign', async(req, res) => {
+        const cursor = assignCollection.find();
+        const result = await cursor.toArray();
+        res.send(result)
+      })
+
+      app.post('/createAssign', async (req, res) => {
+        try {
+            const assignData = req.body; // Retrieve assignment data from request body
+            const result = await assignCollection.insertOne(assignData); // Insert assignment data into collection
+            res.json({ insertedId: result.insertedId });
+        } catch (error) {
+            console.error('Error creating assignment:', error);
+            res.status(500).json({ error: 'Error creating assignment' });
+        }
+    });
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
